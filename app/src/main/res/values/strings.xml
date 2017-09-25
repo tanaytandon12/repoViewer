@@ -11,4 +11,5 @@
     <string name="repoInfoNotLoaded">\?\?/\?\?</string>
     <string name="somethingWentWrong">Something went wrong</string>
     <string name="repoInfoIncorrect">The repo info you\'ve entered is incorrect</string>
+    <string name="internet_not_connected">Internet is not connected</string>
 </resources>

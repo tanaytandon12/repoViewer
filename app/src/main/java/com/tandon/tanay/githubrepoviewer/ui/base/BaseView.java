@@ -11,5 +11,7 @@ public interface BaseView {
 
     Context getViewContext();
 
-    void showErrorMessage(View rootView, int messageResId);
+    void showMessage(View rootView, int messageResId);
+
+    void hideMessage();
 }

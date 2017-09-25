@@ -19,6 +19,7 @@ import com.tandon.tanay.githubrepoviewer.constants.RequestCodes;
 import com.tandon.tanay.githubrepoviewer.model.view.Commit;
 import com.tandon.tanay.githubrepoviewer.ui.base.BaseFragment;
 import com.tandon.tanay.githubrepoviewer.ui.input.InputDialog;
+import com.tandon.tanay.githubrepoviewer.util.DeviceUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +73,16 @@ public class HomeFragment extends BaseFragment implements HomeView,
         return view;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (DeviceUtils.INSTANCE.isNetworkConnected(getContext())) {
+            showMessage(rootView, R.string.internet_not_connected);
+        } else {
+            hideMessage();
+        }
+    }
+
     private void init() {
         initCommitList();
         repoInfoButton.setOnClickListener(this);
@@ -110,7 +121,7 @@ public class HomeFragment extends BaseFragment implements HomeView,
 
     @Override
     public void apiError() {
-        showErrorMessage(rootView, R.string.somethingWentWrong);
+        showMessage(rootView, R.string.somethingWentWrong);
     }
 
     @Override
@@ -135,7 +146,7 @@ public class HomeFragment extends BaseFragment implements HomeView,
 
     @Override
     public void repoDoesNotExist() {
-        showErrorMessage(rootView, R.string.repoInfoIncorrect);
+        showMessage(rootView, R.string.repoInfoIncorrect);
     }
 
     @Override

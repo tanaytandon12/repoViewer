@@ -13,7 +13,7 @@ public abstract class BaseFragment extends Fragment implements BaseView {
     private RepoViewer repoViewer;
 
     @Override
-    public void showErrorMessage(View rootView, int messageResId) {
+    public void showMessage(View rootView, int messageResId) {
         if (snackbar != null) {
             snackbar.dismiss();
         }
@@ -23,7 +23,9 @@ public abstract class BaseFragment extends Fragment implements BaseView {
         }
     }
 
-    public void dismissSnackbar() {
+
+    @Override
+    public void hideMessage() {
         if (snackbar != null) {
             snackbar.dismiss();
         }

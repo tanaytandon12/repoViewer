@@ -14,7 +14,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
     public static final String TAG = BaseActivity.class.getSimpleName();
 
     @Override
-    public void showErrorMessage(View rootView, int messageResId) {
+    public void showMessage(View rootView, int messageResId) {
         if (snackbar != null) {
             snackbar.dismiss();
         }
@@ -29,12 +29,13 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
         return this;
     }
 
-    public void dismissSnackbar() {
+
+    @Override
+    public void hideMessage() {
         if (snackbar != null) {
             snackbar.dismiss();
         }
     }
-
 
     public RepoViewer getApp() {
         if (repoViewer == null) {

@@ -29,7 +29,7 @@ public abstract class BaseDialogFragment extends DialogFragment implements BaseV
     }
 
     @Override
-    public void showErrorMessage(View rootView, int messageResId) {
+    public void showMessage(View rootView, int messageResId) {
         if (snackbar != null) {
             snackbar.dismiss();
         }
@@ -40,4 +40,10 @@ public abstract class BaseDialogFragment extends DialogFragment implements BaseV
 
     }
 
+    @Override
+    public void hideMessage() {
+        if (snackbar != null) {
+            snackbar.dismiss();
+        }
+    }
 }

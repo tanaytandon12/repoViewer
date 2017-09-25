@@ -91,13 +91,13 @@ public class InputDialog extends BaseDialogFragment implements View.OnClickListe
 
     @Override
     public void incorrectRepoName() {
-        showErrorMessage(rootView, R.string.incorrectRepoName);
+        showMessage(rootView, R.string.incorrectRepoName);
         repoNameInput.requestFocus();
     }
 
     @Override
     public void incorrectOwnerName() {
-        showErrorMessage(rootView, R.string.incorrectOwnerName);
+        showMessage(rootView, R.string.incorrectOwnerName);
         ownerNameInput.requestFocus();
     }
 
