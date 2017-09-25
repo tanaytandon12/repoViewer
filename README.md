@@ -11,7 +11,7 @@ The Android application to view commits in github repositories.
 
 * Create a project directory at appropriate location.
 * Open terminal and cd to project directory 
-* In terminal write **git clone git@bitbucket.org:getmyparking/gmpuser.git**
+* In terminal write **git clone  git@github.com:tanaytandon12/repoViewer.git **
 * Open Android Studio
 * Select Open an existing Android Studio Project
 * Navigate to your project and select OK
