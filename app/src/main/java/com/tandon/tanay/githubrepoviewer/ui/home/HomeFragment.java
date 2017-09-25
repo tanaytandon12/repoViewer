@@ -76,7 +76,7 @@ public class HomeFragment extends BaseFragment implements HomeView,
     @Override
     public void onStart() {
         super.onStart();
-        if (DeviceUtils.INSTANCE.isNetworkConnected(getContext())) {
+        if (!DeviceUtils.INSTANCE.isNetworkConnected(getContext())) {
             showMessage(rootView, R.string.internet_not_connected);
         } else {
             hideMessage();
