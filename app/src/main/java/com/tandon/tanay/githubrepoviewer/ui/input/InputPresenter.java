@@ -15,7 +15,6 @@ public class InputPresenter extends BasePresenter<InputView> {
 
     public void inputEntered(String repoName, String ownerName) {
         if (TextUtils.INSTANCE.isValidInput(repoName) && TextUtils.INSTANCE.isValidInput(ownerName)) {
-            Router.INSTANCE.sendInputBroadcast(inputView.getViewContext(), repoName, ownerName);
             inputView.correctInput(repoName, ownerName);
         } else if (TextUtils.INSTANCE.isValidInput(repoName)) {
             inputView.incorrectOwnerName();
@@ -23,5 +22,6 @@ public class InputPresenter extends BasePresenter<InputView> {
             inputView.incorrectRepoName();
         }
     }
+
 
 }

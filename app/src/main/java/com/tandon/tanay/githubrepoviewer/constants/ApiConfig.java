@@ -11,8 +11,9 @@ public interface ApiConfig {
         String BASE_URL = "https://api.github.com/";
 
 
-        String REPOS = "repos/{owner}/{repoName}/commits";
+        String REPO_COMMIT = "repos/{owner}/{repoName}/commits";
 
+        String REPO = "repos/{owner}/{repoName}";
     }
 
     interface Parameters {

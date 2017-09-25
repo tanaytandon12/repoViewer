@@ -29,7 +29,8 @@ public class HomePresenter extends BasePresenter<HomeView> {
     private List<Commit> commits;
     private Set<String> commitShaSet;
     private Integer offset;
-    String repoName, ownerName;
+    private RepoEntity repoEntity;
+
 
     private static final String TAG = HomePresenter.class.getSimpleName();
 
@@ -40,8 +41,6 @@ public class HomePresenter extends BasePresenter<HomeView> {
         this.commits = commits;
         this.commitShaSet = new HashSet<>();
         this.offset = 0;
-        repoName = "rails";
-        ownerName = "rails";
     }
 
     public void load() {
@@ -55,19 +54,18 @@ public class HomePresenter extends BasePresenter<HomeView> {
                     @Override
                     public void accept(List<RepoEntity> repoEntities) throws Exception {
                         if (repoEntities != null && repoEntities.size() > 0) {
-                            RepoEntity repoEntity = repoEntities.get(0);
-                            repoName = repoEntity.getRepoName();
-                            ownerName = repoEntity.getRepoOwner();
+                            repoEntity = repoEntities.get(0);
+                            repoEntityInitialized();
+                        } else {
+                            insertRepoEntity(EntityMapper.INSTANCE.createNewRepoEntity("rails", "rails"));
                         }
-                        homeView.repoInfoLoaded(repoName, ownerName);
-                        loadCommitsFromDb();
-                        loadCommitsFromApi();
                     }
                 });
     }
 
     private void loadCommitsFromDb() {
-        repository.getCommitsFromDb(offset, repoName, ownerName).subscribeOn(Schedulers.computation())
+        repository.getCommitsFromDb(offset, repoEntity)
+                .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<List<CommitEntity>>() {
                     @Override
@@ -79,14 +77,14 @@ public class HomePresenter extends BasePresenter<HomeView> {
     }
 
     private void loadCommitsFromApi() {
-        repository.getCommitsFromApi((commits.size() / DbConfig.LIMIT) + 1, repoName, ownerName)
+        repository.getCommitsFromApi((commits.size() / DbConfig.LIMIT) + 1, repoEntity)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<List<CommitResponse>>() {
                     @Override
                     public void accept(List<CommitResponse> commitResponses) throws Exception {
                         addNewCommits(EntityMapper.INSTANCE.getCommitListFromResponse(commitResponses,
-                                ownerName, repoName));
+                                repoEntity.getRepoOwner(), repoEntity.getRepoName()));
                         saveCommitsToDb(commitResponses);
                         homeView.commitsLoaded();
                     }
@@ -101,7 +99,7 @@ public class HomePresenter extends BasePresenter<HomeView> {
 
     private void saveCommitsToDb(List<CommitResponse> commitResponses) {
         repository.insertCommits(EntityMapper.INSTANCE.
-                getEntitiesFromResponse(commitResponses, repoName, ownerName))
+                getEntitiesFromResponse(commitResponses, repoEntity.getRepoName(), repoEntity.getRepoOwner()))
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<List<CommitEntity>>() {
@@ -117,7 +115,7 @@ public class HomePresenter extends BasePresenter<HomeView> {
         Collections.sort(commits, new Comparator<Commit>() {
             @Override
             public int compare(Commit commit, Commit t1) {
-                return (int) (commit.commitDateTime.getMillis() - t1.commitDateTime.getMillis());
+                return (int) (t1.commitDateTime.getMillis() - commit.commitDateTime.getMillis());
             }
         });
     }
@@ -134,13 +132,14 @@ public class HomePresenter extends BasePresenter<HomeView> {
 
     public void refresh() {
         homeView.refreshStart();
-        repository.getCommitsFromApi(1, repoName, ownerName).subscribeOn(Schedulers.io())
+        repository.getCommitsFromApi(1, repoEntity).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<List<CommitResponse>>() {
                     @Override
                     public void accept(List<CommitResponse> commitResponses) throws Exception {
                         addNewCommits(EntityMapper.INSTANCE
-                                .getCommitListFromResponse(commitResponses, ownerName, repoName));
+                                .getCommitListFromResponse(commitResponses,
+                                        repoEntity.getRepoOwner(), repoEntity.getRepoName()));
                         saveCommitsToDb(commitResponses);
                         homeView.refreshEnd();
                     }
@@ -154,9 +153,62 @@ public class HomePresenter extends BasePresenter<HomeView> {
     }
 
     public void newInputDataAdded(String repoName, String ownerName) {
-        this.repoName = repoName;
-        this.ownerName = ownerName;
-        this.commits.clear();
-        refresh();
+        if (repoEntity == null || !repoEntity.getRepoName().equals(repoName)
+                || !repoEntity.getRepoOwner().equals(ownerName)) {
+            verifyRepo(ownerName, repoName);
+        }
     }
+
+    private void verifyRepo(final String ownerName, final String repoName) {
+        repository.verifyApi(ownerName, repoName).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Object>() {
+                    @Override
+                    public void accept(Object o) throws Exception {
+                        getRepoEntity(ownerName, repoName);
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        homeView.repoDoesNotExist();
+                    }
+                });
+    }
+
+    private void getRepoEntity(final String ownerName, final String repoName) {
+        repository.getRepoEntity(repoName, ownerName, repoEntity).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<RepoEntity>() {
+                    @Override
+                    public void accept(RepoEntity repoEntity) throws Exception {
+                        if (repoEntity != null && repoEntity.getId() != null) {
+                            HomePresenter.this.repoEntity = repoEntity;
+                            repoEntityInitialized();
+                        } else {
+                            insertRepoEntity(repoEntity);
+                        }
+                    }
+                });
+    }
+
+    private void insertRepoEntity(final RepoEntity repoEntity) {
+        repository.insertRepoEntity(repoEntity, this.repoEntity).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Long>() {
+                    @Override
+                    public void accept(Long aLong) throws Exception {
+                        repoEntity.setId(aLong);
+                        HomePresenter.this.repoEntity = repoEntity;
+                        repoEntityInitialized();
+                    }
+                });
+    }
+
+    private void repoEntityInitialized() {
+        homeView.repoInfoLoaded(repoEntity.getRepoName(), repoEntity.getRepoOwner());
+        this.commits.clear();
+        loadCommitsFromDb();
+        loadCommitsFromApi();
+    }
+
 }

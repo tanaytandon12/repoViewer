@@ -3,14 +3,15 @@
     android:id="@+id/rootView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="8dp">
 
 
-    <android.support.v7.widget.AppCompatTextView
+    <android.support.v7.widget.AppCompatButton
         android:id="@+id/repoInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
+        android:background="?selectableItemBackground"
         android:padding="8dp"
         android:text="@string/repoInfoNotLoaded"
         android:textSize="16sp" />

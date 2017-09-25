@@ -10,4 +10,5 @@
     <string name="ok">OK</string>
     <string name="repoInfoNotLoaded">\?\?/\?\?</string>
     <string name="somethingWentWrong">Something went wrong</string>
+    <string name="repoInfoIncorrect">The repo info you\'ve entered is incorrect</string>
 </resources>

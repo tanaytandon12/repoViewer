@@ -8,7 +8,7 @@ public enum TextUtils {
     INSTANCE;
 
     public boolean isValidInput(String id) {
-        Pattern pattern = Pattern.compile("[a-zA-Z0-9]*]");
+        Pattern pattern = Pattern.compile("([A-Za-z])+([0-9])*");
         return pattern.matcher(id).matches();
     }
 }

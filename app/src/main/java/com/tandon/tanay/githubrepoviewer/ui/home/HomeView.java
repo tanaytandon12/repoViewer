@@ -19,4 +19,5 @@ public interface HomeView extends BaseView {
 
     void repoInfoLoaded(String repoName, String ownerName);
 
+    void repoDoesNotExist();
 }

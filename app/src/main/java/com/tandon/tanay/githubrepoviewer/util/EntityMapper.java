@@ -2,6 +2,7 @@ package com.tandon.tanay.githubrepoviewer.util;
 
 import com.tandon.tanay.githubrepoviewer.model.api.CommitResponse;
 import com.tandon.tanay.githubrepoviewer.model.presistent.CommitEntity;
+import com.tandon.tanay.githubrepoviewer.model.presistent.RepoEntity;
 import com.tandon.tanay.githubrepoviewer.model.view.Commit;
 
 import org.joda.time.DateTime;
@@ -69,4 +70,13 @@ public enum EntityMapper {
         commitEntity.setTimestamp(new DateTime(commitResponse.commitInfo.committerInfo.date).getMillis());
         return commitEntity;
     }
+
+    public RepoEntity createNewRepoEntity(String repoOwner, String repoName) {
+        RepoEntity repoEntity = new RepoEntity();
+        repoEntity.setRepoName(repoName);
+        repoEntity.setRepoOwner(repoOwner);
+        repoEntity.setActive(true);
+        return repoEntity;
+    }
+
 }

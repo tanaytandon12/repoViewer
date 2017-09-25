@@ -1,5 +1,7 @@
 package com.tandon.tanay.githubrepoviewer.ui.input;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -100,12 +102,14 @@ public class InputDialog extends BaseDialogFragment implements View.OnClickListe
     }
 
     @Override
-    public void correctInput(String... inputs) {
-        if (inputs.length > 0) {
-            repoName = inputs[0];
-            ownerName = inputs[1];
+    public void correctInput(String repoName, String ownerName) {
+        if (getTargetFragment() != null) {
+            Intent intent = new Intent();
+            intent.putExtra(IntentKeys.REPO_OWNER, ownerName);
+            intent.putExtra(IntentKeys.REPO_NAME, repoName);
+            getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, intent);
         }
-
         dismissDialog();
     }
+
 }

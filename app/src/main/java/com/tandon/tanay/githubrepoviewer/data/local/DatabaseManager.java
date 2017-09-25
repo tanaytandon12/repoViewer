@@ -10,6 +10,8 @@ import com.tandon.tanay.githubrepoviewer.model.presistent.RepoEntityDao;
 
 import java.util.List;
 
+import io.reactivex.Observable;
+
 public class DatabaseManager {
 
     private DaoSession daoSession;
@@ -20,8 +22,10 @@ public class DatabaseManager {
 
     public List<CommitEntity> getCommitEntityList(Integer offset, String repoName, String ownerName) {
         CommitEntityDao commitEntityDao = daoSession.getCommitEntityDao();
-        return commitEntityDao.queryBuilder().limit(DbConfig.LIMIT).offset(offset)
-                .orderDesc(CommitEntityDao.Properties.Timestamp).list();
+        return commitEntityDao.queryBuilder()
+                .orderDesc(CommitEntityDao.Properties.Timestamp)
+                .where(CommitEntityDao.Properties.OwnerName.eq(ownerName),
+                        CommitEntityDao.Properties.RepoName.eq(repoName)).list();
     }
 
     public void saveCommits(List<CommitEntity> commitEntities) {
@@ -32,5 +36,16 @@ public class DatabaseManager {
     public List<RepoEntity> getRepoEntityList() {
         RepoEntityDao repoEntityDao = daoSession.getRepoEntityDao();
         return repoEntityDao.queryBuilder().where(RepoEntityDao.Properties.Active.eq(true)).list();
+    }
+
+    public List<RepoEntity> getRepos(String repoOwner, String repoName) {
+        RepoEntityDao repoEntityDao = daoSession.getRepoEntityDao();
+        return repoEntityDao.queryBuilder().where(RepoEntityDao.Properties.RepoName.eq(repoName),
+                RepoEntityDao.Properties.RepoOwner.eq(repoOwner)).list();
+    }
+
+    public Long insertOrReplaceRepoEntity(RepoEntity repoEntity) {
+        RepoEntityDao repoEntityDao = daoSession.getRepoEntityDao();
+        return repoEntityDao.insertOrReplace(repoEntity);
     }
 }

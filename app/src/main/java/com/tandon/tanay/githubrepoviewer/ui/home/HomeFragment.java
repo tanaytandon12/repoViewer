@@ -1,12 +1,9 @@
 package com.tandon.tanay.githubrepoviewer.ui.home;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,13 +11,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.Button;
 
 import com.tandon.tanay.githubrepoviewer.R;
-import com.tandon.tanay.githubrepoviewer.constants.IntentFilters;
 import com.tandon.tanay.githubrepoviewer.constants.IntentKeys;
+import com.tandon.tanay.githubrepoviewer.constants.RequestCodes;
 import com.tandon.tanay.githubrepoviewer.model.view.Commit;
 import com.tandon.tanay.githubrepoviewer.ui.base.BaseFragment;
+import com.tandon.tanay.githubrepoviewer.ui.input.InputDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +29,8 @@ import butterknife.ButterKnife;
 import static com.tandon.tanay.githubrepoviewer.ui.base.BaseActivity.TAG;
 
 
-public class HomeFragment extends BaseFragment implements HomeView, SwipeRefreshLayout.OnRefreshListener {
+public class HomeFragment extends BaseFragment implements HomeView,
+        SwipeRefreshLayout.OnRefreshListener, View.OnClickListener {
 
     @BindView(R.id.rootView)
     protected View rootView;
@@ -46,19 +45,12 @@ public class HomeFragment extends BaseFragment implements HomeView, SwipeRefresh
     protected SwipeRefreshLayout swipeRefreshLayout;
 
     @BindView(R.id.repoInfo)
-    protected TextView repoInfoTextView;
+    protected Button repoInfoButton;
 
     private HomePresenter homePresenter;
     private CommitAdapter commitAdapter;
     private List<Commit> commits;
-
-    private BroadcastReceiver inputBroadcast = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            newInput(intent.getStringExtra(IntentKeys.REPO_NAME),
-                    intent.getStringExtra(IntentKeys.REPO_OWNER));
-        }
-    };
+    private String repoName, ownerName;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -80,21 +72,10 @@ public class HomeFragment extends BaseFragment implements HomeView, SwipeRefresh
         return view;
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        LocalBroadcastManager.getInstance(getContext()).registerReceiver(inputBroadcast,
-                new IntentFilter(IntentFilters.INPUT_ENTERED));
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(inputBroadcast);
-    }
-
     private void init() {
         initCommitList();
+        repoInfoButton.setOnClickListener(this);
+        swipeRefreshLayout.setOnRefreshListener(this);
         homePresenter.load();
     }
 
@@ -108,9 +89,9 @@ public class HomeFragment extends BaseFragment implements HomeView, SwipeRefresh
     }
 
     private void newInput(String repoName, String ownerName) {
-        homePresenter.newInputDataAdded(repoName, ownerName);
         String text = ownerName + "/" + repoName;
-        repoInfoTextView.setText(text);
+        repoInfoButton.setText(text);
+        homePresenter.newInputDataAdded(repoName, ownerName);
     }
 
     @Override
@@ -141,11 +122,50 @@ public class HomeFragment extends BaseFragment implements HomeView, SwipeRefresh
     public void refreshEnd() {
         swipeRefreshLayout.setRefreshing(false);
         commitAdapter.notifyDataSetChanged();
+
     }
 
     @Override
     public void repoInfoLoaded(String repoName, String ownerName) {
+        this.ownerName = ownerName;
+        this.repoName = repoName;
         String text = ownerName + "/" + repoName;
-        repoInfoTextView.setText(text);
+        repoInfoButton.setText(text);
+    }
+
+    @Override
+    public void repoDoesNotExist() {
+        showErrorMessage(rootView, R.string.repoInfoIncorrect);
+    }
+
+    @Override
+    public void onClick(View view) {
+        int id = view.getId();
+        switch (id) {
+            case R.id.repoInfo: {
+                showInputDialog();
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == Activity.RESULT_OK) {
+            switch (requestCode) {
+                case RequestCodes.CORRECT_INPUT_ENTERED: {
+                    String repoName = data.getStringExtra(IntentKeys.REPO_NAME);
+                    String ownerName = data.getStringExtra(IntentKeys.REPO_OWNER);
+                    newInput(repoName, ownerName);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void showInputDialog() {
+        InputDialog inputDialog = InputDialog.newInstance(ownerName, repoName);
+        inputDialog.setTargetFragment(this, RequestCodes.CORRECT_INPUT_ENTERED);
+        inputDialog.show(getFragmentManager(), InputDialog.TAG);
     }
 }

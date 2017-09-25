@@ -34,7 +34,7 @@ public abstract class BaseDialogFragment extends DialogFragment implements BaseV
             snackbar.dismiss();
         }
         if (rootView != null) {
-            snackbar = Snackbar.make(rootView, messageResId, Snackbar.LENGTH_INDEFINITE);
+            snackbar = Snackbar.make(rootView, messageResId, Snackbar.LENGTH_LONG);
             snackbar.show();
         }
 

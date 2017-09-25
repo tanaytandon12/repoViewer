@@ -3,16 +3,14 @@ package com.tandon.tanay.githubrepoviewer.model.presistent;
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Generated;
-import org.joda.time.DateTime;
 
 
 @Entity
 public class CommitEntity {
 
 
-    @Id
-    private Long id;
 
+    @Id
     private String sha;
 
     private String message;
@@ -32,11 +30,11 @@ public class CommitEntity {
     private Boolean isFavourite;
 
 
-    @Generated(hash = 1112228540)
-    public CommitEntity(Long id, String sha, String message, String url,
-            String avatarUrl, String userLogin, String repoName, String ownerName,
-            Long timestamp, Boolean isFavourite) {
-        this.id = id;
+
+    @Generated(hash = 678290642)
+    public CommitEntity(String sha, String message, String url, String avatarUrl,
+            String userLogin, String repoName, String ownerName, Long timestamp,
+            Boolean isFavourite) {
         this.sha = sha;
         this.message = message;
         this.url = url;
@@ -53,16 +51,9 @@ public class CommitEntity {
     }
 
 
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getSha() {
         return this.sha;
-    }
-
-    public Long getId() {
-        return this.id;
     }
 
     public void setSha(String sha) {

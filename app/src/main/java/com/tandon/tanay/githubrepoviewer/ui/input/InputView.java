@@ -9,5 +9,5 @@ public interface InputView extends BaseView {
 
     void incorrectOwnerName();
 
-    void correctInput(String... inputs);
+    void correctInput(String repoName, String ownerName);
 }
